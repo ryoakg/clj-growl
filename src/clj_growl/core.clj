@@ -149,37 +149,3 @@
                                  notification
                                  title
                                  message))))))
-
-;;
-;; Send Growl notifictions via the command growlnotify.
-;; This is an alternative way of sending notifications. It is easier
-;; to use but not as reliable.
-;;
-
-(defn- execute-command [command]
-  (do (println command)
-      (try
-        (let [proc (.exec (Runtime/getRuntime) command)
-              exit-val (.waitFor proc)])
-        (catch Exception e (println e)))))
-
-(defn- options-seq [opts]
-  (mapcat #(cond (and (= (key %) :type)
-                      (= (val %) :sticky))
-                 ["-s"]
-                 (= (key %) :image)
-                 ["--image" (val %)]
-                 :else [])
-       opts))
-
-(defn growlnotify
-  ([app title message]
-     (growlnotify app {:type :none} title message))
-  ([app opts title message]
-     (let [opts (options-seq opts)]
-       (execute-command (into-array
-                         (concat ["growlnotify"]
-                                 ["-n" app
-                                  "-t" title
-                                  "-m" message]
-                                 opts))))))
